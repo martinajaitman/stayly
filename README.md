@@ -2,6 +2,8 @@
 
 Plataforma de automatización para alquileres temporarios: reservas de Airbnb/Booking por iCal, calendario centralizado, ficha de propiedades, portal del huésped con asistente IA, limpieza e incidencias.
 
+**Demo publicada:** https://stayly-sigma.vercel.app (admin@stayly.demo / stayly123)
+
 **Estado:** semana 1 de 4 (base, auth, propiedades, reservas, sincronización iCal, dashboard y calendario).
 
 ## Stack
@@ -12,7 +14,7 @@ Next.js 16 (App Router) · Supabase (Postgres, Auth, RLS, Storage, Realtime) · 
 1. Crear un proyecto en [supabase.com](https://supabase.com).
 2. Aplicar el esquema y los datos demo, con **una** de estas opciones:
    - CLI: `npx supabase link --project-ref <ref>` → `npx supabase db push` → correr `supabase/seed.sql` en el SQL Editor.
-   - Manual: pegar `supabase/migrations/20261026000000_init.sql` y después `supabase/seed.sql` en el SQL Editor.
+   - Manual: en el SQL Editor correr, en orden, `supabase/migrations/20261026000000_init.sql`, `supabase/migrations/20261026000001_grants.sql` y `supabase/seed.sql`.
 3. `cp .env.example .env.local` y completar las claves (Project Settings → API Keys).
 4. `npm install && npm run dev` → http://localhost:3000
 
@@ -21,10 +23,14 @@ También podés registrarte desde `/login`: el alta crea una organización nueva
 
 ## Sincronización iCal
 - Cada propiedad acepta una o más URLs de exportación iCal (Airbnb, Booking.com).
-- `GET /api/cron/tick` (con `Authorization: Bearer $CRON_SECRET`) sincroniza todas las propiedades. `vercel.json` lo programa cada 15 min.
-  En el plan Hobby de Vercel los crons solo pueden correr una vez por día: para la demo usar el botón **Sincronizar ahora** de cada propiedad, o un cron externo (cron-job.org) que llame al endpoint.
+- `GET /api/cron/tick` (con `Authorization: Bearer $CRON_SECRET`) sincroniza todas las propiedades. `vercel.json` lo programa una vez por día (límite del plan Hobby de Vercel).
+  Para sincronizar más seguido: botón **Sincronizar ahora** de cada propiedad, o un cron externo (cron-job.org) que llame al endpoint cada 15 min.
 - Lógica pura y testeada en `src/lib/ical/` (`parse.ts`, `plan.ts`): altas, cambios de fecha, cancelaciones (solo de canales cuyo feed se leyó bien) y se ignoran los bloqueos manuales de Airbnb.
 - Limitación: iCal no trae nombre ni teléfono del huésped. El panel marca esas reservas con **Falta contacto** para completarlo.
+
+## Deploy
+Vercel (proyecto `stayly`). Variables de entorno de producción: las de `.env.example`, con `NEXT_PUBLIC_APP_URL=https://stayly-sigma.vercel.app`.
+`npx vercel deploy --prod` publica desde la carpeta del proyecto.
 
 ## Estructura
 ```

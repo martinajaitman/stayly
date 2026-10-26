@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Cache Components queda desactivado: casi toda la app es por usuario
+  // (panel autenticado y portal por token) y se renderiza por request.
   turbopack: {
     rules: {
       "*.css": {

@@ -16,7 +16,7 @@ async function fetchFeed(url: string): Promise<FeedResult> {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const text = await res.text();
   if (!text.includes("BEGIN:VCALENDAR")) throw new Error("La respuesta no es un calendario iCal");
-  return { channel: detectChannel(url), events: parseIcal(text) };
+  return { channel: detectChannel(url, text), events: parseIcal(text) };
 }
 
 type SyncableProperty = Pick<Property, "id" | "organization_id" | "ical_urls" | "checkin_time" | "checkout_time">;

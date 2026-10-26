@@ -64,7 +64,11 @@ export function parseIcal(text: string): IcalEvent[] {
   return events;
 }
 
-export function detectChannel(url: string): BookingChannel {
+/**
+ * Detecta el canal por la URL y, si no alcanza, por el PRODID del calendario
+ * (Airbnb: "-//Airbnb Inc//…", Booking: "-//admin.booking.com//…").
+ */
+export function detectChannel(url: string, icalText = ""): BookingChannel {
   const host = (() => {
     try {
       return new URL(url).hostname;
@@ -74,6 +78,9 @@ export function detectChannel(url: string): BookingChannel {
   })();
   if (host.includes("airbnb")) return "airbnb";
   if (host.includes("booking.com")) return "booking";
+  const prodId = icalText.match(/^PRODID[^:]*:(.*)$/m)?.[1] ?? "";
+  if (/airbnb/i.test(prodId)) return "airbnb";
+  if (/booking\.com/i.test(prodId)) return "booking";
   return "other";
 }
 

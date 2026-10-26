@@ -16,7 +16,7 @@ const guestSchema = z.object({
 
 const reservationSchema = z
   .object({
-    property_id: z.uuid("Elegí una propiedad"),
+    property_id: z.guid("Elegí una propiedad"),
     channel: z.enum(["airbnb", "booking", "direct", "other"]),
     check_in_day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha de llegada inválida"),
     check_out_day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha de salida inválida"),

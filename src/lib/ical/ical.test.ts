@@ -29,6 +29,11 @@ describe("parseIcal", () => {
     expect(detectChannel("https://admin.booking.com/hotel/hoteladmin/ical.html?t=x")).toBe("booking");
     expect(detectChannel("https://example.com/cal.ics")).toBe("other");
   });
+
+  it("detecta el canal por el PRODID cuando la URL no lo dice", () => {
+    expect(detectChannel("https://example.com/a.ics", fixture("airbnb.ics"))).toBe("airbnb");
+    expect(detectChannel("https://example.com/b.ics", fixture("booking.ics"))).toBe("booking");
+  });
 });
 
 describe("planSync", () => {

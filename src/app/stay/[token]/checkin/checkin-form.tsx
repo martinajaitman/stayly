@@ -10,14 +10,15 @@ import { registerGuest } from "../actions";
 
 function Step({ n, title, active, done, children }: { n: number; title: string; active: boolean; done: boolean; children: React.ReactNode }) {
   return (
-    <section className={clsx("rounded-2xl border border-border bg-surface p-4", !active && "opacity-60")}>
+    <section data-step={n} className={clsx("rounded-2xl border border-border bg-surface p-4", !active && "opacity-60")}>
       <h2 className="flex items-center gap-3 font-medium">
         <span className={clsx("grid size-7 place-items-center rounded-full text-sm text-white", done ? "bg-ok" : "bg-accent")}>
           {done ? <Check size={16} /> : n}
         </span>
         {title}
       </h2>
-      {active && <div className="mt-4 flex flex-col gap-4">{children}</div>}
+      {/* Siempre montado (oculto si no está activo) para que el submit final incluya todos los campos */}
+      <div className={clsx("mt-4 flex-col gap-4", active ? "flex" : "hidden")}>{children}</div>
     </section>
   );
 }
@@ -51,8 +52,8 @@ export function CheckinForm({
   }
 
   function next() {
-    const form = formRef.current!;
-    if (!form.reportValidity()) return;
+    const fields = formRef.current!.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-step="1"] input, [data-step="1"] select');
+    for (const field of fields) if (!field.reportValidity()) return;
     if (!photo && !hasDocument) return setLocalError("Sacale una foto a tu documento");
     setLocalError(null);
     setStep(2);
@@ -108,7 +109,6 @@ export function CheckinForm({
         <Button type="button" onClick={next}>Continuar</Button>
       </Step>
 
-      {/* Los campos del paso 2 quedan montados (ocultos) para que el submit los incluya */}
       <Step n={2} title="Normas de la casa" active={step === 2} done={false}>
         <div className="max-h-48 overflow-y-auto rounded-xl bg-surface-muted/60 p-3 text-sm whitespace-pre-line">
           {houseRules || "Respetá el alojamiento y a los vecinos. Ante cualquier problema, reportalo desde este portal."}

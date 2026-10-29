@@ -29,7 +29,7 @@ export default async function TaskPage({ params }: PageProps<"/today/[taskId]">)
         <h1 className="text-2xl font-semibold">{t.properties?.name}</h1>
         <TaskStatusBadge status={t.status} />
       </div>
-      <p className="flex items-center gap-1 text-sm text-muted"><MapPin size={14} /> {t.properties?.address}</p>
+      {t.properties?.address && <p className="flex items-center gap-1 text-sm text-muted"><MapPin size={14} /> {t.properties.address}</p>}
       <p className="mb-4 text-sm text-muted">
         {t.type === "cleaning" ? "Limpieza" : "Mantenimiento"}
         {t.scheduled_for && ` · desde las ${toZonedTime(new Date(t.scheduled_for), org.timezone)}`}

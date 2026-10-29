@@ -79,7 +79,7 @@ export default async function TodayPage() {
               <h3 className="font-semibold">#{i.number} · {i.title}</h3>
               <IncidentStatusBadge status={i.status} />
             </div>
-            <p className="mt-1 flex items-center gap-1 text-sm text-muted"><MapPin size={14} /> {i.properties?.name} · {i.properties?.address}</p>
+            <p className="mt-1 flex items-center gap-1 text-sm text-muted"><MapPin size={14} /> {i.properties?.name}{i.properties?.address && ` · ${i.properties.address}`}</p>
             {i.description && <p className="mt-3 text-sm">{i.description}</p>}
             <div className="mt-3"><PriorityBadge priority={i.priority} /></div>
             <div className="mt-4 grid grid-cols-2 gap-2">

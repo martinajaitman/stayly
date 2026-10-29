@@ -20,17 +20,32 @@ export async function createStaff(_: FormState, formData: FormData): Promise<For
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const { full_name, email, role, password } = parsed.data;
 
-  // organization_id y role van en app_metadata: solo el servidor puede escribirlos
-  // y el trigger handle_new_user los usa para crear el perfil en esta organización.
-  const { error } = await createAdminClient().auth.admin.createUser({
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
     app_metadata: { organization_id: org.id, role },
     user_metadata: { full_name },
   });
-  if (error) {
-    return { error: /already|registered|exists/i.test(error.message) ? "Ya existe un usuario con ese email." : error.message };
+  if (error || !data.user) {
+    return { error: error && /already|registered|exists/i.test(error.message) ? "Ya existe un usuario con ese email." : (error?.message ?? "No se pudo crear el usuario") };
+  }
+
+  // Supabase inserta el usuario antes de guardar app_metadata, así que el trigger
+  // handle_new_user lo trata como un registro público y le crea una organización
+  // propia. Lo movemos a esta organización y borramos la que quedó vacía.
+  const { data: created } = await admin.from("profiles").select("organization_id").eq("id", data.user.id).single();
+  const { error: moveError } = await admin
+    .from("profiles")
+    .update({ organization_id: org.id, role, full_name })
+    .eq("id", data.user.id);
+  if (moveError) {
+    await admin.auth.admin.deleteUser(data.user.id);
+    return { error: "No se pudo agregar a la organización. Probá de nuevo." };
+  }
+  if (created && created.organization_id !== org.id) {
+    await admin.from("organizations").delete().eq("id", created.organization_id);
   }
   revalidatePath("/team");
   return { ok: `Listo. ${full_name} ya puede entrar con ${email} y la contraseña que elegiste.` };

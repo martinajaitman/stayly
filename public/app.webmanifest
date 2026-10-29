@@ -1,0 +1,17 @@
+{
+  "name": "Stayly",
+  "short_name": "Stayly",
+  "description": "Gestión de alojamientos temporarios: panel del administrador, limpieza y profesionales.",
+  "start_url": "/login",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf9f7",
+  "theme_color": "#c8623e",
+  "lang": "es-AR",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

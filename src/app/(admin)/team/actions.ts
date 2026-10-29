@@ -7,6 +7,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export type FormState = { error?: string; ok?: string } | undefined;
 
+const SERVICES = ["plumbing", "electricity", "gas", "air", "locksmith", "appliances", "internet", "general"];
+
 const staffSchema = z.object({
   full_name: z.string().trim().min(2, "Completá el nombre"),
   email: z.email("Email inválido"),
@@ -19,6 +21,10 @@ export async function createStaff(_: FormState, formData: FormData): Promise<For
   const parsed = staffSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const { full_name, email, role, password } = parsed.data;
+  const specialties = role === "maintenance" ? formData.getAll("specialties").map(String).filter((s) => SERVICES.includes(s)) : [];
+  if (role === "maintenance" && specialties.length === 0) return { error: "Elegí al menos un rubro para el profesional" };
+  const zone = String(formData.get("zone") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim() || null;
 
   const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.createUser({
@@ -38,7 +44,7 @@ export async function createStaff(_: FormState, formData: FormData): Promise<For
   const { data: created } = await admin.from("profiles").select("organization_id").eq("id", data.user.id).single();
   const { error: moveError } = await admin
     .from("profiles")
-    .update({ organization_id: org.id, role, full_name })
+    .update({ organization_id: org.id, role, full_name, specialties, zone, phone })
     .eq("id", data.user.id);
   if (moveError) {
     await admin.auth.admin.deleteUser(data.user.id);

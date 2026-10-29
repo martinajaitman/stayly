@@ -1,5 +1,6 @@
 import { Logo } from "@/components/logo";
 import { Card } from "@/components/ui";
+import { InstallHint } from "./install-hint";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
@@ -14,6 +15,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <Card>
           <LoginForm next={typeof next === "string" ? next : undefined} />
         </Card>
+        <InstallHint />
       </div>
     </main>
   );

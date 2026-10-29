@@ -21,10 +21,15 @@ const tools: Anthropic.Tool[] = [
       properties: {
         category: { type: "string", enum: ["maintenance", "cleaning", "access", "amenities", "noise", "other"] },
         priority: { type: "string", enum: ["medium", "high"], description: "high solo si impide usar el alojamiento con normalidad" },
+        service: {
+          type: "string",
+          enum: ["plumbing", "electricity", "gas", "air", "locksmith", "appliances", "internet", "general", "none"],
+          description: "Rubro del profesional que lo arregla (none si no hace falta un técnico, ej. limpieza o ruidos)",
+        },
         title: { type: "string", description: "Resumen corto en español, ej: 'No funciona el aire acondicionado'" },
         description: { type: "string", description: "Lo que contó el huésped, con los detalles útiles para el técnico" },
       },
-      required: ["category", "priority", "title", "description"],
+      required: ["category", "priority", "service", "title", "description"],
       additionalProperties: false,
     },
   },
@@ -48,6 +53,7 @@ const tools: Anthropic.Tool[] = [
 const IncidentInput = z.object({
   category: z.enum(["maintenance", "cleaning", "access", "amenities", "noise", "other"]),
   priority: z.enum(["medium", "high"]),
+  service: z.enum(["plumbing", "electricity", "gas", "air", "locksmith", "appliances", "internet", "general", "none"]),
   title: z.string().min(3).max(120),
   description: z.string().max(2000),
 });
@@ -144,9 +150,10 @@ export async function runAssistant(
           title: input.data.title,
           description: input.data.description,
           reportedBy: "ai",
+          service: input.data.service === "none" ? null : input.data.service,
         });
         emit({ type: "incident", number });
-        results.push({ type: "tool_result", tool_use_id: tool.id, content: `Incidencia #${number} creada y equipo notificado.` });
+        results.push({ type: "tool_result", tool_use_id: tool.id, content: `Incidencia #${number} creada y equipo notificado.${input.data.service !== "none" ? " Ya se pidieron presupuestos a los técnicos; cuando el administrador apruebe uno, el huésped va a poder elegir el horario de la visita en su página." : ""}` });
       } else if (tool.name === "escalate_to_admin") {
         const input = EscalateInput.safeParse(tool.input);
         escalated = true;

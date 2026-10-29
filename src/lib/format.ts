@@ -15,3 +15,8 @@ export function nights(checkIn: string, checkOut: string) {
 export function portalUrl(token: string) {
   return `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/stay/${token}`;
 }
+
+export function formatMoney(amount: number | null | undefined) {
+  if (amount == null) return "—";
+  return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(amount);
+}

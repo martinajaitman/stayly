@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { AlertTriangle, ChevronRight, KeyRound, LogOut, MapPin, MessageCircle, MessagesSquare, ScrollText, Star, Wifi } from "lucide-react";
 import { Button } from "@/components/ui";
-import { getPortalReservation, isArrivalDay } from "@/lib/portal";
+import { getGuestIncidents, getPortalReservation, isArrivalDay } from "@/lib/portal";
 import { toZonedDay, toZonedTime } from "@/lib/time";
 import { confirmArrival } from "./actions";
+import { VisitCard } from "./visit-card";
 
 function dayLabel(iso: string, tz: string) {
   const day = toZonedDay(new Date(iso), tz);
@@ -43,6 +44,7 @@ export default async function StayPage({ params, searchParams }: PageProps<"/sta
   const arrival = isArrivalDay(r);
   const inside = r.status === "checked_in";
   const firstName = r.guests?.full_name?.split(" ")[0];
+  const incidents = await getGuestIncidents(r.id);
 
   return (
     <div className="flex flex-col gap-3">
@@ -67,6 +69,10 @@ export default async function StayPage({ params, searchParams }: PageProps<"/sta
           Recibimos tu reporte (incidencia #{reported}). Ya le avisamos al equipo, te contactan a la brevedad.
         </p>
       )}
+
+      {incidents.map((i) => (
+        <VisitCard key={i.id} token={token} incident={i} timeZone={tz} />
+      ))}
 
       {/* Paso siguiente según el momento de la estadía */}
       {r.status === "confirmed" && !r.rules_accepted_at && (

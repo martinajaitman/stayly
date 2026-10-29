@@ -27,3 +27,15 @@ export async function requireAdmin() {
   if (session.profile.role !== "admin") redirect("/today");
   return session;
 }
+
+/** Últimos avisos del usuario logueado (campana). */
+export async function getMyNotifications() {
+  const { supabase, profile } = await getSession();
+  const { data } = await supabase
+    .from("notifications")
+    .select("id, title, body, link, read_at, created_at")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  return (data ?? []) as import("@/lib/types").Notification[];
+}

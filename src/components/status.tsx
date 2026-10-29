@@ -52,7 +52,15 @@ export function TaskStatusBadge({ status }: { status: TaskStatus }) {
   return <Badge tone={taskTone[status]}>{TASK_STATUS_LABEL[status]}</Badge>;
 }
 
-const incidentTone: Record<IncidentStatus, Tone> = { pending: "red", assigned: "yellow", in_progress: "blue", resolved: "green" };
+const incidentTone: Record<IncidentStatus, Tone> = {
+  pending: "red",
+  quoting: "yellow",
+  awaiting_approval: "red",
+  assigned: "blue",
+  scheduled: "blue",
+  in_progress: "blue",
+  resolved: "green",
+};
 
 export function IncidentStatusBadge({ status }: { status: IncidentStatus }) {
   return <Badge tone={incidentTone[status]}>{INCIDENT_STATUS_LABEL[status]}</Badge>;

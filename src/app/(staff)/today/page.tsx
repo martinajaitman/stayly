@@ -6,12 +6,15 @@ import { getSession } from "@/lib/session";
 import { addDays, toZonedDay, toZonedTime, zonedToUtc } from "@/lib/time";
 import type { Incident, Task } from "@/lib/types";
 import { setMyIncidentStatus } from "../actions";
+import { ProHome } from "./pro-home";
 
 type TaskRow = Task & { properties: { name: string; address: string } | null };
 type IncidentRow = Incident & { properties: { name: string; address: string } | null };
 
-export default async function TodayPage() {
-  const { supabase, profile, org } = await getSession();
+export default async function TodayPage({ searchParams }: PageProps<"/today">) {
+  const session = await getSession();
+  if (session.profile.role === "maintenance") return <ProHome sent={(await searchParams).sent === "1"} />;
+  const { supabase, profile, org } = session;
   const tz = org.timezone;
   const today = toZonedDay(new Date(), tz);
   const tomorrowStart = zonedToUtc(addDays(today, 1), "00:00", tz).toISOString();

@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
-import { INCIDENT_CATEGORY_LABEL } from "@/lib/types";
+import { INCIDENT_CATEGORY_LABEL, SERVICE_LABEL } from "@/lib/types";
 import { createIncidentAdmin } from "./actions";
 
 export function NewIncidentForm({ properties, staff }: { properties: { id: string; name: string }[]; staff: { id: string; label: string }[] }) {
@@ -40,9 +40,18 @@ export function NewIncidentForm({ properties, staff }: { properties: { id: strin
             <option value="high">Alta</option>
           </Select>
         </Field>
-        <Field label="Asignar a">
+        <Field label="Rubro del técnico" hint="Si elegís uno, pedimos presupuestos automáticamente">
+          <Select name="service" defaultValue="">
+            <option value="">No hace falta técnico</option>
+            {Object.entries(SERVICE_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </Select>
+        </Field>
+        <Field label="Tope ($)" hint="Vacío = el tope por defecto">
+          <Input name="budget_cap" inputMode="numeric" />
+        </Field>
+        <Field label="Asignar a mano (opcional)">
           <Select name="assigned_to" defaultValue="">
-            <option value="">Sin asignar</option>
+            <option value="">Nadie: pedir presupuestos</option>
             {staff.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </Select>
         </Field>

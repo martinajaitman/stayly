@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { IncidentCategory, IncidentPriority, IncidentStatus, PropertyStatus, ReservationStatus } from "@/lib/types";
+import type { IncidentCategory, IncidentPriority, IncidentStatus, PropertyStatus, ReservationStatus, ServiceType } from "@/lib/types";
+import { startQuoting } from "./maintenance";
 import { DEFAULT_CLEANING_CHECKLIST, derivePropertyStatus, isCheckoutDue } from "./status";
 
 // Eventos del dominio: "el sistema operativo de la estadía".
@@ -85,6 +86,9 @@ export interface NewIncident {
   description?: string;
   reportedBy: "guest" | "admin" | "staff" | "ai";
   assignedTo?: string | null;
+  /** Rubro: si está, se piden presupuestos automáticamente a los profesionales. */
+  service?: ServiceType | null;
+  budgetCap?: number | null;
 }
 
 export async function createIncident(i: NewIncident): Promise<{ id: string; number: number }> {
@@ -102,11 +106,14 @@ export async function createIncident(i: NewIncident): Promise<{ id: string; numb
       reported_by: i.reportedBy,
       assigned_to: i.assignedTo ?? null,
       status: i.assignedTo ? "assigned" : "pending",
+      service: i.service ?? null,
+      budget_cap: i.budgetCap ?? null,
     })
     .select("id, number")
     .single();
   if (error || !data) throw new Error(error?.message ?? "No se pudo crear la incidencia");
   await refreshPropertyStatus(i.propertyId);
+  if (i.service && !i.assignedTo) await startQuoting(data.id);
   return data;
 }
 

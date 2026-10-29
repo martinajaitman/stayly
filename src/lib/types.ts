@@ -5,7 +5,7 @@ export type PropertyStatus = "available" | "occupied" | "cleaning" | "maintenanc
 export type BookingChannel = "airbnb" | "booking" | "direct" | "other";
 export type ReservationStatus = "confirmed" | "checked_in" | "checked_out" | "cancelled";
 export type TaskStatus = "pending" | "in_progress" | "done";
-export type IncidentStatus = "pending" | "assigned" | "in_progress" | "resolved";
+export type IncidentStatus = "pending" | "quoting" | "awaiting_approval" | "assigned" | "scheduled" | "in_progress" | "resolved";
 
 export interface Recommendation {
   category: string;
@@ -155,6 +155,15 @@ export interface Incident {
   status: IncidentStatus;
   resolved_at: string | null;
   created_at: string;
+  service: ServiceType | null;
+  budget_cap: number | null;
+  quote_deadline: string | null;
+  resolution: Resolution | null;
+  selected_quote_id: string | null;
+  approved_amount: number | null;
+  approved_at: string | null;
+  visit_at: string | null;
+  resolution_notes: string;
 }
 
 export const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
@@ -165,7 +174,10 @@ export const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
 
 export const INCIDENT_STATUS_LABEL: Record<IncidentStatus, string> = {
   pending: "Pendiente",
+  quoting: "Cotizando",
+  awaiting_approval: "Esperando tu aprobación",
   assigned: "Asignada",
+  scheduled: "Visita agendada",
   in_progress: "En proceso",
   resolved: "Resuelta",
 };
@@ -188,5 +200,44 @@ export const INCIDENT_CATEGORY_LABEL: Record<IncidentCategory, string> = {
 export const ROLE_LABEL: Record<UserRole, string> = {
   admin: "Administrador",
   cleaner: "Limpieza",
-  maintenance: "Mantenimiento",
+  maintenance: "Profesional",
 };
+
+export type ServiceType = "plumbing" | "electricity" | "gas" | "air" | "locksmith" | "appliances" | "internet" | "general";
+export type Resolution = "repair" | "replace";
+export type QuoteStatus = "submitted" | "selected" | "discarded";
+
+export const SERVICE_LABEL: Record<ServiceType, string> = {
+  plumbing: "Plomería",
+  electricity: "Electricidad",
+  gas: "Gas",
+  air: "Aire acondicionado",
+  locksmith: "Cerrajería",
+  appliances: "Electrodomésticos",
+  internet: "Internet / TV",
+  general: "Mantenimiento general",
+};
+
+export const RESOLUTION_LABEL: Record<Resolution, string> = { repair: "Arreglar", replace: "Reemplazar" };
+
+export interface Quote {
+  id: string;
+  organization_id: string;
+  incident_id: string;
+  professional_id: string;
+  repair_amount: number | null;
+  replace_amount: number | null;
+  notes: string;
+  proposed_slots: string[];
+  status: QuoteStatus;
+  created_at: string;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  body: string;
+  link: string | null;
+  read_at: string | null;
+  created_at: string;
+}

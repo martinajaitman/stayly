@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { extractDocumentFields, type DocumentData } from "@/lib/ai/document";
 import { checkIn, checkOut, createIncident } from "@/lib/automation/events";
+import { scheduleVisit } from "@/lib/automation/maintenance";
 import { getPortalReservation, isArrivalDay } from "@/lib/portal";
 import { uploadImage } from "@/lib/storage";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -89,6 +90,7 @@ const reportSchema = z.object({
   category: z.enum(["maintenance", "cleaning", "access", "amenities", "noise", "other"]),
   description: z.string().trim().min(5, "Contanos un poco más qué pasa"),
   urgent: z.string().optional(),
+  service: z.enum(["plumbing", "electricity", "gas", "air", "locksmith", "appliances", "internet", "general", ""]).optional(),
 });
 
 export async function reportProblem(token: string, _: PortalState, formData: FormData): Promise<PortalState> {
@@ -106,6 +108,7 @@ export async function reportProblem(token: string, _: PortalState, formData: For
     title: CATEGORY_TITLE[parsed.data.category],
     description: parsed.data.description,
     reportedBy: "guest",
+    service: parsed.data.category === "maintenance" || parsed.data.category === "access" ? parsed.data.service || "general" : null,
   });
   redirect(`/stay/${token}?reported=${number}`);
 }
@@ -139,4 +142,13 @@ export async function readDocument(token: string, formData: FormData): Promise<D
   const photo = formData.get("document_photo");
   if (!(photo instanceof File) || photo.size === 0 || photo.size > 4 * 1024 * 1024) return null;
   return extractDocumentFields(photo);
+}
+
+export async function pickVisitSlot(token: string, incidentId: string, formData: FormData) {
+  const r = await getPortalReservation(token);
+  if (!r) return;
+  const { data: incident } = await createAdminClient().from("incidents").select("reservation_id").eq("id", incidentId).single();
+  if (incident?.reservation_id !== r.id) return;
+  await scheduleVisit(incidentId, String(formData.get("slot") ?? ""), "guest");
+  revalidatePath(`/stay/${token}`);
 }

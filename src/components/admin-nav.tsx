@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Building2, CalendarDays, ClipboardList, Home, MessageCircle, NotebookTabs, Users } from "lucide-react";
+import { BarChart3, Building2, CalendarDays, ClipboardList, Home, MessageCircle, NotebookTabs, Settings, Users } from "lucide-react";
 
 const items = [
   { href: "/dashboard", label: "Inicio", icon: Home },
@@ -13,6 +13,7 @@ const items = [
   { href: "/tasks", label: "Tareas", icon: ClipboardList },
   { href: "/inbox", label: "Comunicación", icon: MessageCircle },
   { href: "/team", label: "Equipo", icon: Users },
+  { href: "/settings", label: "Configuración", icon: Settings },
   { href: null, label: "Analytics", icon: BarChart3 },
 ];
 

@@ -57,6 +57,8 @@ const incidentSchema = z.object({
   title: z.string().trim().min(3, "Poné un título"),
   description: z.string().trim(),
   assigned_to: z.string().transform((v) => v || null),
+  service: z.enum(["plumbing", "electricity", "gas", "air", "locksmith", "appliances", "internet", "general", ""]).transform((v) => v || null),
+  budget_cap: z.string().transform((v) => v.replace(/[^\d]/g, "")).transform((v) => (v ? Number(v) : null)),
 });
 
 export async function createIncidentAdmin(_: FormState, formData: FormData): Promise<FormState> {
@@ -75,7 +77,9 @@ export async function createIncidentAdmin(_: FormState, formData: FormData): Pro
     description: parsed.data.description,
     reportedBy: "admin",
     assignedTo: parsed.data.assigned_to,
+    service: parsed.data.service,
+    budgetCap: parsed.data.budget_cap,
   });
   refresh();
-  return { ok: `Incidencia #${number} creada.` };
+  return { ok: parsed.data.service && !parsed.data.assigned_to ? `Incidencia #${number} creada. Ya pedimos presupuestos.` : `Incidencia #${number} creada.` };
 }

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { PropertyStatusBadge } from "@/components/status";
 import { Badge, Card, EmptyState } from "@/components/ui";
 import { processDueCheckouts } from "@/lib/automation/events";
+import { FundCard } from "@/components/fund-card";
+import { getFundStatus, processQuoteDeadlines } from "@/lib/automation/maintenance";
 import { formatDateTime } from "@/lib/format";
 import { requireAdmin } from "@/lib/session";
 import { addDays, toZonedDay, zonedToUtc } from "@/lib/time";
@@ -14,6 +16,7 @@ export default async function DashboardPage() {
   const { supabase, org } = await requireAdmin();
   // El cron del plan gratuito corre una vez por día: se completa acá al abrir el panel.
   await processDueCheckouts(org.id);
+  await processQuoteDeadlines(org.id);
   const tz = org.timezone;
   const now = new Date();
   const today = toZonedDay(now, tz);
@@ -22,7 +25,7 @@ export default async function DashboardPage() {
   const weekEnd = zonedToUtc(addDays(today, 7), "00:00", tz).toISOString();
 
   const active = () => supabase.from("reservations").select("*", { count: "exact", head: true }).neq("status", "cancelled");
-  const [checkins, checkouts, staying, cleanings, incidents, props, arrivals, attention] = await Promise.all([
+  const [checkins, checkouts, staying, cleanings, incidents, props, arrivals, attention, fund, approvals] = await Promise.all([
     active().gte("check_in_at", dayStart).lt("check_in_at", dayEnd),
     active().gte("check_out_at", dayStart).lt("check_out_at", dayEnd),
     supabase.from("reservations").select("guests_count").neq("status", "cancelled").lte("check_in_at", now.toISOString()).gt("check_out_at", now.toISOString()),
@@ -38,6 +41,8 @@ export default async function DashboardPage() {
       .order("check_in_at")
       .limit(10),
     supabase.from("conversations").select("*", { count: "exact", head: true }).eq("needs_attention", true),
+    getFundStatus(org.id),
+    supabase.from("incidents").select("*", { count: "exact", head: true }).eq("status", "awaiting_approval"),
   ]);
 
   const guestsNow = (staying.data ?? []).reduce((sum, r) => sum + (r.guests_count ?? 0), 0);
@@ -59,6 +64,12 @@ export default async function DashboardPage() {
         <p className="text-sm text-muted">{properties.length} propiedades</p>
       </div>
 
+      {(approvals.count ?? 0) > 0 && (
+        <Link href="/tasks?tab=incidents" className="mb-4 flex items-center justify-between rounded-2xl bg-danger-soft px-5 py-3 text-danger">
+          <span className="font-medium">{approvals.count} presupuesto(s) esperan tu aprobación</span>
+          <span className="text-sm">Ver →</span>
+        </Link>
+      )}
       {(attention.count ?? 0) > 0 && (
         <Link href="/inbox" className="mb-4 flex items-center justify-between rounded-2xl bg-warn-soft px-5 py-3 text-warn">
           <span className="font-medium">{attention.count} conversación(es) de huéspedes necesitan tu respuesta</span>
@@ -95,6 +106,7 @@ export default async function DashboardPage() {
         </section>
 
         <section>
+          <div className="mb-6"><FundCard fund={fund} /></div>
           <h2 className="mb-3 text-sm font-medium text-muted">Próximas llegadas (7 días)</h2>
           {upcoming.length === 0 ? (
             <EmptyState>No hay llegadas esta semana.</EmptyState>

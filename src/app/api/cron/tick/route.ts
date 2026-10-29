@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { processDueCheckouts } from "@/lib/automation/events";
+import { processQuoteDeadlines } from "@/lib/automation/maintenance";
 import { syncProperty } from "@/lib/ical/sync";
 
 // Vercel Cron (ver vercel.json): sincroniza iCal y cierra estadías vencidas.
@@ -27,5 +28,6 @@ export async function GET(request: NextRequest) {
   }
 
   const checkouts = await processDueCheckouts();
+  await processQuoteDeadlines();
   return NextResponse.json({ synced: results.length, checkouts, results });
 }

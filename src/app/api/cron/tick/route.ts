@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { processDueCheckouts } from "@/lib/automation/events";
 import { syncProperty } from "@/lib/ical/sync";
 
-// Vercel Cron (ver vercel.json). En semana 3 se suma el envío de mensajes programados.
+// Vercel Cron (ver vercel.json): sincroniza iCal y cierra estadías vencidas.
 export async function GET(request: NextRequest) {
   if (request.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -25,5 +26,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ synced: results.length, results });
+  const checkouts = await processDueCheckouts();
+  return NextResponse.json({ synced: results.length, checkouts, results });
 }

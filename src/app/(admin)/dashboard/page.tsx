@@ -2,6 +2,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { PropertyStatusBadge } from "@/components/status";
 import { Badge, Card, EmptyState } from "@/components/ui";
+import { processDueCheckouts } from "@/lib/automation/events";
 import { formatDateTime } from "@/lib/format";
 import { requireAdmin } from "@/lib/session";
 import { addDays, toZonedDay, zonedToUtc } from "@/lib/time";
@@ -11,6 +12,8 @@ type Arrival = Reservation & { properties: { name: string } | null; guests: { fu
 
 export default async function DashboardPage() {
   const { supabase, org } = await requireAdmin();
+  // El cron del plan gratuito corre una vez por día: se completa acá al abrir el panel.
+  await processDueCheckouts(org.id);
   const tz = org.timezone;
   const now = new Date();
   const today = toZonedDay(now, tz);

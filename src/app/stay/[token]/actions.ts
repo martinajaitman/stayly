@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { extractDocumentFields, type DocumentData } from "@/lib/ai/document";
 import { checkIn, checkOut, createIncident } from "@/lib/automation/events";
 import { getPortalReservation, isArrivalDay } from "@/lib/portal";
 import { uploadImage } from "@/lib/storage";
@@ -129,4 +130,13 @@ export async function guestCheckout(token: string, _: PortalState, formData: For
   await checkOut(r.id);
   revalidatePath(`/stay/${token}`);
   redirect(`/stay/${token}`);
+}
+
+/** Lee la foto del documento con IA para autocompletar el check-in. */
+export async function readDocument(token: string, formData: FormData): Promise<DocumentData | null> {
+  const r = await getPortalReservation(token);
+  if (!r || r.status !== "confirmed") return null;
+  const photo = formData.get("document_photo");
+  if (!(photo instanceof File) || photo.size === 0 || photo.size > 4 * 1024 * 1024) return null;
+  return extractDocumentFields(photo);
 }

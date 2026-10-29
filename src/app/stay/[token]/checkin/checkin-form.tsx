@@ -2,11 +2,11 @@
 
 import clsx from "clsx";
 import { useActionState, useRef, useState, useTransition } from "react";
-import { Camera, Check } from "lucide-react";
+import { Camera, Check, Sparkles } from "lucide-react";
 import { Button, Field, Input, Select } from "@/components/ui";
 import { compressImage } from "@/lib/compress-image";
 import type { Guest } from "@/lib/types";
-import { registerGuest } from "../actions";
+import { readDocument, registerGuest } from "../actions";
 
 function Step({ n, title, active, done, children }: { n: number; title: string; active: boolean; done: boolean; children: React.ReactNode }) {
   return (
@@ -44,11 +44,30 @@ export function CheckinForm({
   const [localError, setLocalError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  const [reading, setReading] = useState<"idle" | "reading" | "filled" | "manual">("idle");
+
   async function onPhoto(file: File | undefined) {
     if (!file) return;
     const small = await compressImage(file);
     setPhoto(small);
     setPreview(URL.createObjectURL(small));
+
+    // Autocompletar con IA. Si falla, el huésped completa a mano como siempre.
+    setReading("reading");
+    const data = new FormData();
+    data.set("document_photo", small);
+    const fields = await readDocument(token, data).catch(() => null);
+    if (!fields) return setReading("manual");
+    const form = formRef.current!;
+    const set = (name: string, value: string | null) => {
+      const el = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null;
+      if (el && value) el.value = value;
+    };
+    set("full_name", fields.full_name);
+    set("document_type", fields.document_type);
+    set("document_number", fields.document_number);
+    set("nationality", fields.nationality);
+    setReading("filled");
   }
 
   function next() {
@@ -81,6 +100,9 @@ export function CheckinForm({
           {preview ? "Tocá para sacar otra foto" : hasDocument ? "Ya tenemos tu documento. Tocá para cambiarlo." : "Sacale una foto al frente de tu DNI o pasaporte"}
           <input type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => onPhoto(e.target.files?.[0])} />
         </label>
+        {reading === "reading" && <p className="flex items-center gap-2 text-sm text-accent"><Sparkles size={16} className="animate-pulse" /> Leyendo tu documento…</p>}
+        {reading === "filled" && <p className="flex items-center gap-2 text-sm text-ok"><Check size={16} /> Autocompletado. Revisá que esté todo bien.</p>}
+        {reading === "manual" && <p className="text-sm text-muted">No pudimos leer el documento automáticamente. Completá tus datos abajo.</p>}
         <Field label="Nombre y apellido">
           <Input name="full_name" required minLength={3} defaultValue={guest?.full_name} autoComplete="name" />
         </Field>
@@ -106,7 +128,7 @@ export function CheckinForm({
           <Input name="email" type="email" defaultValue={guest?.email ?? ""} autoComplete="email" />
         </Field>
         {localError && <p className="text-sm text-danger">{localError}</p>}
-        <Button type="button" onClick={next}>Continuar</Button>
+        <Button type="button" onClick={next} disabled={reading === "reading"}>Continuar</Button>
       </Step>
 
       <Step n={2} title="Normas de la casa" active={step === 2} done={false}>

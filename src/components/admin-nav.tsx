@@ -11,8 +11,8 @@ const items = [
   { href: "/reservations", label: "Reservas", icon: NotebookTabs },
   { href: "/properties", label: "Propiedades", icon: Building2 },
   { href: "/tasks", label: "Tareas", icon: ClipboardList },
+  { href: "/inbox", label: "Comunicación", icon: MessageCircle },
   { href: "/team", label: "Equipo", icon: Users },
-  { href: null, label: "Comunicación", icon: MessageCircle },
   { href: null, label: "Analytics", icon: BarChart3 },
 ];
 

@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   const weekEnd = zonedToUtc(addDays(today, 7), "00:00", tz).toISOString();
 
   const active = () => supabase.from("reservations").select("*", { count: "exact", head: true }).neq("status", "cancelled");
-  const [checkins, checkouts, staying, cleanings, incidents, props, arrivals] = await Promise.all([
+  const [checkins, checkouts, staying, cleanings, incidents, props, arrivals, attention] = await Promise.all([
     active().gte("check_in_at", dayStart).lt("check_in_at", dayEnd),
     active().gte("check_out_at", dayStart).lt("check_out_at", dayEnd),
     supabase.from("reservations").select("guests_count").neq("status", "cancelled").lte("check_in_at", now.toISOString()).gt("check_out_at", now.toISOString()),
@@ -37,6 +37,7 @@ export default async function DashboardPage() {
       .lt("check_in_at", weekEnd)
       .order("check_in_at")
       .limit(10),
+    supabase.from("conversations").select("*", { count: "exact", head: true }).eq("needs_attention", true),
   ]);
 
   const guestsNow = (staying.data ?? []).reduce((sum, r) => sum + (r.guests_count ?? 0), 0);
@@ -57,6 +58,13 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Hoy, {title}</h1>
         <p className="text-sm text-muted">{properties.length} propiedades</p>
       </div>
+
+      {(attention.count ?? 0) > 0 && (
+        <Link href="/inbox" className="mb-4 flex items-center justify-between rounded-2xl bg-warn-soft px-5 py-3 text-warn">
+          <span className="font-medium">{attention.count} conversación(es) de huéspedes necesitan tu respuesta</span>
+          <span className="text-sm">Ver →</span>
+        </Link>
+      )}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {kpis.map((k) => (

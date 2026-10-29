@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { AlertTriangle, ChevronRight, KeyRound, LogOut, MapPin, MessageCircle, ScrollText, Star, Wifi } from "lucide-react";
+import { AlertTriangle, ChevronRight, KeyRound, LogOut, MapPin, MessageCircle, MessagesSquare, ScrollText, Star, Wifi } from "lucide-react";
 import { Button } from "@/components/ui";
 import { getPortalReservation, isArrivalDay } from "@/lib/portal";
 import { toZonedDay, toZonedTime } from "@/lib/time";
@@ -142,7 +142,13 @@ export default async function StayPage({ params, searchParams }: PageProps<"/sta
       )}
 
       {r.status !== "checked_out" && (
-        <div className="mt-2 grid grid-cols-2 gap-3">
+        <Link href={`/stay/${token}/chat`} className="mt-2 flex items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-4 py-4 font-medium">
+          <MessagesSquare size={20} className="text-accent" /> Hablar con el asistente
+        </Link>
+      )}
+
+      {r.status !== "checked_out" && (
+        <div className="grid grid-cols-2 gap-3">
           <Link href={`/stay/${token}/report`} className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-surface px-3 py-4 text-sm font-medium">
             <AlertTriangle size={20} className="text-danger" /> Reportar un problema
           </Link>

@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/session";
 import type { Property } from "@/lib/types";
 import { deleteProperty } from "../actions";
 import { PropertyForm } from "../property-form";
+import { getCleaners } from "../staff";
 import { SyncButton } from "../sync-button";
 
 export default async function PropertyPage({ params }: PageProps<"/properties/[id]">) {
@@ -14,6 +15,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[i
   const { data } = await supabase.from("properties").select("*").eq("id", id).maybeSingle();
   if (!data) notFound();
   const property = data as Property;
+  const staff = await getCleaners(supabase);
 
   const lastSync = property.ical_last_synced_at
     ? new Date(property.ical_last_synced_at).toLocaleString("es-AR", { timeZone: org.timezone, dateStyle: "short", timeStyle: "short" })
@@ -34,7 +36,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[i
       {property.ical_last_error && (
         <p className="mb-5 rounded-xl bg-danger-soft px-4 py-3 text-sm whitespace-pre-line text-danger">{property.ical_last_error}</p>
       )}
-      <PropertyForm property={property} />
+      <PropertyForm property={property} staff={staff} />
       <form action={deleteProperty.bind(null, property.id)} className="mt-10 border-t border-border pt-6">
         <ConfirmButton variant="danger" message="¿Eliminar la propiedad y todas sus reservas? No se puede deshacer.">
           Eliminar propiedad

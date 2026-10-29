@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { checkIn, checkOut } from "@/lib/automation/events";
 import { requireAdmin } from "@/lib/session";
 import { zonedToUtc } from "@/lib/time";
 
@@ -120,5 +121,23 @@ export async function setReservationStatus(reservationId: string, status: "confi
   const { supabase } = await requireAdmin();
   const { error } = await supabase.from("reservations").update({ status }).eq("id", reservationId);
   if (error) throw new Error(error.message);
+  revalidatePath(`/reservations/${reservationId}`);
+}
+
+async function ownReservation(reservationId: string) {
+  const { supabase } = await requireAdmin();
+  const { data } = await supabase.from("reservations").select("id").eq("id", reservationId).single();
+  if (!data) throw new Error("Reserva no encontrada");
+}
+
+export async function markCheckIn(reservationId: string) {
+  await ownReservation(reservationId);
+  await checkIn(reservationId);
+  revalidatePath(`/reservations/${reservationId}`);
+}
+
+export async function markCheckOut(reservationId: string) {
+  await ownReservation(reservationId);
+  await checkOut(reservationId);
   revalidatePath(`/reservations/${reservationId}`);
 }

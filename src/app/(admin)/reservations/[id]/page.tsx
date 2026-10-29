@@ -5,9 +5,10 @@ import { ConfirmButton } from "@/components/confirm-button";
 import { Button, Card, PageHeader } from "@/components/ui";
 import { formatDateTime, nights, portalUrl } from "@/lib/format";
 import { requireAdmin } from "@/lib/session";
+import { signedUrls } from "@/lib/storage";
 import { toZonedDay, toZonedTime } from "@/lib/time";
 import type { Guest, Reservation } from "@/lib/types";
-import { setReservationStatus } from "../actions";
+import { markCheckIn, markCheckOut, setReservationStatus } from "../actions";
 import { CopyLink, GuestForm, TimesForm } from "./forms";
 
 type Row = Reservation & { properties: { id: string; name: string } | null; guests: Guest | null };
@@ -19,6 +20,13 @@ export default async function ReservationPage({ params }: PageProps<"/reservatio
   if (!data) notFound();
   const r = data as Row;
   const tz = org.timezone;
+  const [documentUrl] = await signedUrls("guest-documents", r.guests?.document_image_path ? [r.guests.document_image_path] : []);
+  const { data: cleaning } = await supabase
+    .from("tasks")
+    .select("id, status, profiles(full_name)")
+    .eq("reservation_id", r.id)
+    .eq("type", "cleaning")
+    .maybeSingle();
   const split = (iso: string) => ({ day: toZonedDay(new Date(iso), tz), time: toZonedTime(new Date(iso), tz) });
 
   return (
@@ -49,6 +57,50 @@ export default async function ReservationPage({ params }: PageProps<"/reservatio
             <p className="font-medium">{formatDateTime(r.check_out_at, tz)}</p>
           </div>
           {r.notes && <p className="text-sm text-muted sm:col-span-3">{r.notes}</p>}
+        </Card>
+
+        <Card>
+          <h2 className="mb-3 font-semibold">Check-in y check-out</h2>
+          <div className="grid gap-4 text-sm sm:grid-cols-2">
+            <div>
+              <p className="text-xs text-muted">Registro del huésped</p>
+              <p>{r.rules_accepted_at ? `✓ Normas aceptadas ${formatDateTime(r.rules_accepted_at, tz)}` : "Pendiente"}</p>
+              {r.guests?.document_number && (
+                <p className="text-muted">
+                  {r.guests.document_type} {r.guests.document_number}
+                  {r.guests.nationality && ` · ${r.guests.nationality}`}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-muted">Llegada / salida</p>
+              <p>{r.checked_in_at ? `Llegó ${formatDateTime(r.checked_in_at, tz)}` : "Todavía no llegó"}</p>
+              {r.checked_out_at && <p>Se fue {formatDateTime(r.checked_out_at, tz)}</p>}
+              {cleaning && (
+                <p className="text-muted">
+                  Limpieza: {cleaning.status === "done" ? "terminada" : cleaning.status === "in_progress" ? "en proceso" : "pendiente"}
+                  {(cleaning.profiles as unknown as { full_name: string } | null)?.full_name &&
+                    ` · ${(cleaning.profiles as unknown as { full_name: string }).full_name}`}
+                </p>
+              )}
+            </div>
+          </div>
+          {documentUrl && (
+            <a href={documentUrl} target="_blank" rel="noreferrer" className="mt-4 block">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={documentUrl} alt="Documento del huésped" className="max-h-48 rounded-xl border border-border" />
+            </a>
+          )}
+          <div className="mt-4 flex gap-2">
+            {r.status === "confirmed" && (
+              <form action={markCheckIn.bind(null, r.id)}><Button variant="secondary">Marcar check-in</Button></form>
+            )}
+            {(r.status === "confirmed" || r.status === "checked_in") && (
+              <form action={markCheckOut.bind(null, r.id)}>
+                <ConfirmButton variant="secondary" message="¿Marcar el check-out? Se genera la tarea de limpieza.">Marcar check-out</ConfirmButton>
+              </form>
+            )}
+          </div>
         </Card>
 
         <Card>

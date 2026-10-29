@@ -3,15 +3,16 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Building2, CalendarDays, ClipboardList, Home, MessageCircle, NotebookTabs } from "lucide-react";
+import { BarChart3, Building2, CalendarDays, ClipboardList, Home, MessageCircle, NotebookTabs, Users } from "lucide-react";
 
 const items = [
   { href: "/dashboard", label: "Inicio", icon: Home },
   { href: "/calendar", label: "Calendario", icon: CalendarDays },
   { href: "/reservations", label: "Reservas", icon: NotebookTabs },
   { href: "/properties", label: "Propiedades", icon: Building2 },
+  { href: "/tasks", label: "Tareas", icon: ClipboardList },
+  { href: "/team", label: "Equipo", icon: Users },
   { href: null, label: "Comunicación", icon: MessageCircle },
-  { href: null, label: "Tareas", icon: ClipboardList },
   { href: null, label: "Analytics", icon: BarChart3 },
 ];
 

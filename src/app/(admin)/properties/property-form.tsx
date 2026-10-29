@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { Button, Card, Field, Input, Textarea } from "@/components/ui";
+import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
 import type { FaqItem, Property, Recommendation } from "@/lib/types";
 import { saveProperty } from "./actions";
 
@@ -16,7 +16,7 @@ function Section({ title, description, children }: { title: string; description?
   );
 }
 
-export function PropertyForm({ property }: { property?: Property }) {
+export function PropertyForm({ property, staff }: { property?: Property; staff: { id: string; name: string }[] }) {
   const [state, action, pending] = useActionState(saveProperty.bind(null, property?.id ?? null), undefined);
   const [recs, setRecs] = useState<Recommendation[]>(property?.recommendations ?? []);
   const [faq, setFaq] = useState<FaqItem[]>(property?.faq ?? []);
@@ -65,6 +65,14 @@ export function PropertyForm({ property }: { property?: Property }) {
         </Field>
         <Field label="Instrucciones de acceso" className="sm:col-span-2">
           <Textarea name="access_instructions" defaultValue={property?.access_instructions} />
+        </Field>
+        <Field label="Persona de limpieza por defecto" hint="Recibe automáticamente la limpieza después de cada check-out" className="sm:col-span-2">
+          <Select name="default_cleaner_id" defaultValue={property?.default_cleaner_id ?? ""}>
+            <option value="">Sin asignar</option>
+            {staff.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </Select>
         </Field>
         <Field label="Llaves" className="sm:col-span-2">
           <Textarea name="keys_info" defaultValue={property?.keys_info} placeholder="Dónde están y dónde dejarlas al salir" />

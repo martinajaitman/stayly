@@ -38,6 +38,7 @@ const propertySchema = z.object({
   access_code: z.string().trim(),
   keys_info: z.string().trim(),
   manager_contact: z.string().trim(),
+  default_cleaner_id: z.string().transform((v) => v || null),
   recommendations: json(z.array(z.object({ category: z.string(), name: z.string(), description: z.string() }))),
   faq: json(z.array(z.object({ question: z.string(), answer: z.string() }))),
 });

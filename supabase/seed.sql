@@ -14,8 +14,9 @@ insert into auth.users (
 )
 select '00000000-0000-0000-0000-000000000000', u.id, 'authenticated', 'authenticated', u.email,
        crypt('stayly123', gen_salt('bf')), now(),
-       '{"provider":"email","providers":["email"]}',
-       jsonb_build_object('organization_id', '11111111-1111-1111-1111-111111111111', 'full_name', u.full_name, 'role', u.role),
+       jsonb_build_object('provider', 'email', 'providers', jsonb_build_array('email'),
+                          'organization_id', '11111111-1111-1111-1111-111111111111', 'role', u.role),
+       jsonb_build_object('full_name', u.full_name),
        now(), now(), '', '', '', ''
 from (values
   ('aaaaaaaa-0000-0000-0000-000000000001'::uuid, 'admin@stayly.demo', 'Pía Usandizaga', 'admin'),

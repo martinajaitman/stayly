@@ -20,6 +20,9 @@ export interface Selection {
   /** La más barata de cada tipo que entra en el tope y en el saldo del pozo. */
   bestRepair: Option | null;
   bestReplace: Option | null;
+  /** La más barata de cada tipo aunque supere el tope (para que el admin pueda elegir igual). */
+  cheapestRepair: Option | null;
+  cheapestReplace: Option | null;
   /** La más barata de todas las que entran. */
   recommended: Option | null;
   /** Si nada entra: la opción más barata igual, para que el admin decida si sube el tope. */
@@ -49,6 +52,8 @@ export function selectQuote(quotes: QuoteInput[], budgetCap: number | null, fund
   return {
     bestRepair: valid.find((o) => o.resolution === "repair") ?? null,
     bestReplace: valid.find((o) => o.resolution === "replace") ?? null,
+    cheapestRepair: options.find((o) => o.resolution === "repair") ?? null,
+    cheapestReplace: options.find((o) => o.resolution === "replace") ?? null,
     recommended: valid[0] ?? null,
     cheapestOverall: options[0] ?? null,
     options,

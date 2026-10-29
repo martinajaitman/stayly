@@ -40,7 +40,10 @@ export default async function IncidentPage({ params }: PageProps<"/tasks/inciden
       <form action={approve.bind(null, i.id, o.quoteId, o.resolution)}>
         <Button className="w-full justify-between" variant={highlight ? "primary" : "secondary"}>
           <span>{RESOLUTION_LABEL[o.resolution]} con {names.get(o.professionalId)}</span>
-          <span>{formatMoney(o.amount)}</span>
+          <span>
+            {formatMoney(o.amount)}
+            {!o.withinBudget && <span className="ml-1 text-xs opacity-80">(supera el tope)</span>}
+          </span>
         </Button>
       </form>
     );
@@ -135,15 +138,10 @@ export default async function IncidentPage({ params }: PageProps<"/tasks/inciden
                   ? "Recomendación: el presupuesto más barato dentro del tope. Confirmá para asignarlo."
                   : "Ningún presupuesto entra en el tope o en el pozo. Podés subir el tope o aprobar igual."}
               </p>
+              {/* Siempre las dos opciones: la mejor dentro del tope o, si no hay, la más barata marcada como que lo supera. */}
               <div className="grid gap-2 sm:grid-cols-2">
-                {selection.recommended ? (
-                  <>
-                    {optionButton(selection.bestRepair, selection.recommended.resolution === "repair")}
-                    {optionButton(selection.bestReplace, selection.recommended.resolution === "replace")}
-                  </>
-                ) : (
-                  optionButton(selection.cheapestOverall, false)
-                )}
+                {optionButton(selection.bestRepair ?? selection.cheapestRepair, selection.recommended?.resolution === "repair")}
+                {optionButton(selection.bestReplace ?? selection.cheapestReplace, selection.recommended?.resolution === "replace")}
               </div>
             </div>
           )}

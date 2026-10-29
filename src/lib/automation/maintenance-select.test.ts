@@ -15,6 +15,7 @@ describe("selectQuote", () => {
     expect(s.recommended).toMatchObject({ quoteId: "luis", resolution: "repair", amount: 35000 });
     expect(s.bestRepair?.quoteId).toBe("luis");
     expect(s.bestReplace).toBeNull(); // 90.000 supera el tope de 60.000
+    expect(s.cheapestReplace).toMatchObject({ quoteId: "ricardo", amount: 90000, withinBudget: false });
   });
 
   it("el saldo del pozo también limita", () => {

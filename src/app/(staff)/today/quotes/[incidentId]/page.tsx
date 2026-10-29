@@ -28,7 +28,7 @@ export default async function QuotePage({ params }: PageProps<"/today/quotes/[in
   };
   const slots = candidateSlots((availability ?? []) as { weekday: number; slot: DaySlot }[], org.timezone).map((s) => ({
     iso: s.iso,
-    label: `${formatSlot(s.iso, org.timezone).split(",")[0]} · ${SLOT_LABEL[s.slot]}`,
+    label: `${new Intl.DateTimeFormat("es-AR", { timeZone: org.timezone, weekday: "long", day: "numeric", month: "short" }).format(new Date(s.iso)).replace(/^./, (c) => c.toUpperCase())} · ${SLOT_LABEL[s.slot]}`,
   }));
 
   return (

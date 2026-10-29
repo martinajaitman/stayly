@@ -5,7 +5,7 @@ import "./globals.css";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Stayly",
+  title: "StayAdmin",
   description: "Una plataforma. Un recorrido. Cero trabajo manual innecesario.",
 };
 

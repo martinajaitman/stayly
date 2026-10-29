@@ -11,7 +11,7 @@ export function Logo({ size = 32 }: { size?: number }) {
           <circle cx="12" cy="15.5" r="1" fill="currentColor" />
         </svg>
       </span>
-      Stayly
+      StayAdmin
     </span>
   );
 }

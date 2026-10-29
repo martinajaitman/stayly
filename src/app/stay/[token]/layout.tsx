@@ -8,7 +8,7 @@ export default async function StayLayout({ children, params }: LayoutProps<"/sta
   return (
     <div className="min-h-screen bg-background">
       <main className="mx-auto max-w-md px-4 pt-6 pb-12">{children}</main>
-      <p className="pb-6 text-center text-xs text-muted">{r.organizations.name} · con Stayly</p>
+      <p className="pb-6 text-center text-xs text-muted">{r.organizations.name} · con StayAdmin</p>
     </div>
   );
 }

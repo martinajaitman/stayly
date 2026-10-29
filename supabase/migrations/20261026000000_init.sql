@@ -1,4 +1,4 @@
--- Stayly: esquema inicial
+-- StayAdmin: esquema inicial
 -- Multi-tenant por organization_id. El portal del huésped no usa RLS:
 -- se sirve desde el servidor con service role, validando el portal_token.
 

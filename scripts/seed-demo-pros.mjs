@@ -33,7 +33,7 @@ async function user(email, fullName, role, extra) {
   if (existing.length) return existing[0].id;
   const { data, error } = await db.auth.admin.createUser({
     email,
-    password: "stayly123",
+    password: "stayadmin123",
     email_confirm: true,
     app_metadata: { organization_id: ORG, role },
     user_metadata: { full_name: fullName },
@@ -56,9 +56,9 @@ async function main() {
   must(await db.from("organizations").update({ monthly_incident_fund: 300000, default_incident_cap: 60000, quote_window_minutes: 120 }).eq("id", ORG));
 
   // Profesionales + disponibilidad
-  const ricardo = await user("ricardo@stayly.demo", "Ricardo Gómez", "maintenance", { specialties: ["plumbing", "air"], zone: "Palermo, Villa Crespo", phone: "+54 9 11 5555-0301" });
-  const luis = await user("luis@stayly.demo", "Luis Fernández", "maintenance", { specialties: ["plumbing", "electricity", "air"], zone: "Belgrano, Colegiales", phone: "+54 9 11 5555-0302" });
-  const carla = await user("carla@stayly.demo", "Carla Ruiz", "maintenance", { specialties: ["electricity", "appliances"], zone: "Recoleta, Palermo", phone: "+54 9 11 5555-0303" });
+  const ricardo = await user("ricardo@stayadmin.demo", "Ricardo Gómez", "maintenance", { specialties: ["plumbing", "air"], zone: "Palermo, Villa Crespo", phone: "+54 9 11 5555-0301" });
+  const luis = await user("luis@stayadmin.demo", "Luis Fernández", "maintenance", { specialties: ["plumbing", "electricity", "air"], zone: "Belgrano, Colegiales", phone: "+54 9 11 5555-0302" });
+  const carla = await user("carla@stayadmin.demo", "Carla Ruiz", "maintenance", { specialties: ["electricity", "appliances"], zone: "Recoleta, Palermo", phone: "+54 9 11 5555-0303" });
   const avail = (id, cells) => cells.map(([weekday, slot]) => ({ profile_id: id, organization_id: ORG, weekday, slot }));
   must(await db.from("professional_availability").upsert([
     ...avail(ricardo, [[1, "morning"], [2, "morning"], [2, "afternoon"], [3, "afternoon"], [4, "morning"], [4, "afternoon"], [5, "afternoon"]]),

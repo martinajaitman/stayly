@@ -1,8 +1,8 @@
-# Stayly — MVP
+# StayAdmin — MVP
 
 Plataforma de automatización para alquileres temporarios: reservas de Airbnb/Booking por iCal, calendario centralizado, ficha de propiedades, portal del huésped con asistente IA, limpieza e incidencias.
 
-**Demo publicada:** https://stayly-sigma.vercel.app (admin@stayly.demo / stayly123)
+**Demo publicada:** https://stayadmin-app.vercel.app (admin@stayadmin.demo / stayadmin123)
 
 **Estado:** semana 1 de 4 (base, auth, propiedades, reservas, sincronización iCal, dashboard y calendario).
 
@@ -18,7 +18,7 @@ Next.js 16 (App Router) · Supabase (Postgres, Auth, RLS, Storage, Realtime) · 
 3. `cp .env.example .env.local` y completar las claves (Project Settings → API Keys).
 4. `npm install && npm run dev` → http://localhost:3000
 
-Usuarios demo (del seed): `admin@stayly.demo` / `stayly123` (admin) y `maria@stayly.demo` / `stayly123` (limpieza).
+Usuarios demo (del seed): `admin@stayadmin.demo` / `stayadmin123` (admin) y `maria@stayadmin.demo` / `stayadmin123` (limpieza).
 También podés registrarte desde `/login`: el alta crea una organización nueva con vos como admin.
 
 ## Sincronización iCal
@@ -29,7 +29,7 @@ También podés registrarte desde `/login`: el alta crea una organización nueva
 - Limitación: iCal no trae nombre ni teléfono del huésped. El panel marca esas reservas con **Falta contacto** para completarlo.
 
 ## Deploy
-Vercel (proyecto `stayly`). Variables de entorno de producción: las de `.env.example`, con `NEXT_PUBLIC_APP_URL=https://stayly-sigma.vercel.app`.
+Vercel (proyecto `stayadmin`). Variables de entorno de producción: las de `.env.example`, con `NEXT_PUBLIC_APP_URL=https://stayadmin-app.vercel.app`.
 `npx vercel deploy --prod` publica desde la carpeta del proyecto.
 
 ## Estructura

@@ -25,7 +25,7 @@ export function InstallHint() {
   if (platform === "installed") return null;
   return (
     <div className="mt-4 rounded-2xl border border-border bg-surface p-4 text-sm">
-      <p className="font-medium">Instalá la app de Stayly</p>
+      <p className="font-medium">Instalá la app de StayAdmin</p>
       {event ? (
         <button onClick={() => event.prompt()} className="mt-2 inline-flex items-center gap-2 rounded-xl bg-brand px-3 py-2 font-medium text-white">
           <Download size={16} /> Instalar en este dispositivo

@@ -25,7 +25,7 @@ export default async function TeamPage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Equipo" subtitle="Tu gente de limpieza y tus profesionales. Todos usan la app de Stayly." />
+      <PageHeader title="Equipo" subtitle="Tu gente de limpieza y tus profesionales. Todos usan la app de StayAdmin." />
       {GROUPS.map((g) => {
         const rows = people.filter((p) => p.role === g.role);
         return (

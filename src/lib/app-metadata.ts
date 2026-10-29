@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from "next";
 // web del huésped no los usa, así no se ofrece para instalar.
 export const appMetadata: Metadata = {
   manifest: "/app.webmanifest",
-  appleWebApp: { capable: true, title: "Stayly", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "StayAdmin", statusBarStyle: "default" },
   icons: { apple: "/icons/apple-touch-icon.png" },
 };
 

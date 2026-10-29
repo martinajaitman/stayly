@@ -1,6 +1,6 @@
 {
-  "name": "Stayly",
-  "short_name": "Stayly",
+  "name": "StayAdmin",
+  "short_name": "StayAdmin",
   "description": "Gestión de alojamientos temporarios: panel del administrador, limpieza y profesionales.",
   "start_url": "/login",
   "scope": "/",

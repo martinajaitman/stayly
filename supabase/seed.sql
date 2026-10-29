@@ -1,5 +1,5 @@
 -- Datos de demo: organización "Palermo Stays" con las 4 propiedades de los mockups.
--- Usuarios:  admin@stayly.demo / stayly123   ·   maria@stayly.demo / stayly123 (limpieza)
+-- Usuarios:  admin@stayadmin.demo / stayadmin123   ·   maria@stayadmin.demo / stayadmin123 (limpieza)
 -- Las fechas son relativas a hoy, así la demo siempre tiene movimiento.
 
 begin;
@@ -13,19 +13,19 @@ insert into auth.users (
   confirmation_token, email_change, email_change_token_new, recovery_token
 )
 select '00000000-0000-0000-0000-000000000000', u.id, 'authenticated', 'authenticated', u.email,
-       crypt('stayly123', gen_salt('bf')), now(),
+       crypt('stayadmin123', gen_salt('bf')), now(),
        jsonb_build_object('provider', 'email', 'providers', jsonb_build_array('email'),
                           'organization_id', '11111111-1111-1111-1111-111111111111', 'role', u.role),
        jsonb_build_object('full_name', u.full_name),
        now(), now(), '', '', '', ''
 from (values
-  ('aaaaaaaa-0000-0000-0000-000000000001'::uuid, 'admin@stayly.demo', 'Pía Usandizaga', 'admin'),
-  ('aaaaaaaa-0000-0000-0000-000000000002'::uuid, 'maria@stayly.demo', 'María López', 'cleaner')
+  ('aaaaaaaa-0000-0000-0000-000000000001'::uuid, 'admin@stayadmin.demo', 'Pía Usandizaga', 'admin'),
+  ('aaaaaaaa-0000-0000-0000-000000000002'::uuid, 'maria@stayadmin.demo', 'María López', 'cleaner')
 ) as u(id, email, full_name, role);
 
 insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
 select gen_random_uuid(), id, id::text, jsonb_build_object('sub', id::text, 'email', email), 'email', now(), now(), now()
-from auth.users where email like '%@stayly.demo';
+from auth.users where email like '%@stayadmin.demo';
 
 -- Propiedades
 insert into properties (

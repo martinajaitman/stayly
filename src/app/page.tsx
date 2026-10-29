@@ -24,11 +24,11 @@ export default function Home() {
       <section className="mb-14 max-w-2xl">
         <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">Automatizamos todo lo que ocurre entre la reserva y el check-out.</h1>
         <p className="mt-4 text-lg text-muted">
-          Stayly es el sistema operativo de la estadía para administradores de alquileres temporarios: más propiedades, menos trabajo manual.
+          StayAdmin es el sistema operativo de la estadía para administradores de alquileres temporarios: más propiedades, menos trabajo manual.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/login" className="rounded-xl bg-brand px-5 py-3 font-medium text-white">Soy administrador o parte del equipo</Link>
-          <Link href="/stay/demo-depto4b" className="rounded-xl border border-border bg-surface px-5 py-3 font-medium">Ver la página de un huésped</Link>
+          <Link href="/stay/demo-ph7" className="rounded-xl border border-border bg-surface px-5 py-3 font-medium">Ver la página de un huésped</Link>
         </div>
       </section>
 

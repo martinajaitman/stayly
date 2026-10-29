@@ -46,9 +46,9 @@ async function user(email, fullName, role, extra) {
 }
 
 async function main() {
-  const already = must(await db.from("profiles").select("id").eq("organization_id", ORG).eq("role", "maintenance"));
+  const already = must(await db.from("properties").select("id").eq("organization_id", ORG).eq("name", "PH 7 - Villa Crespo"));
   if (already.length) {
-    console.log("Los profesionales demo ya existen. Nada para hacer.");
+    console.log("Los datos demo de profesionales ya están cargados. Nada para hacer.");
     return;
   }
 
@@ -60,11 +60,11 @@ async function main() {
   const luis = await user("luis@stayly.demo", "Luis Fernández", "maintenance", { specialties: ["plumbing", "electricity", "air"], zone: "Belgrano, Colegiales", phone: "+54 9 11 5555-0302" });
   const carla = await user("carla@stayly.demo", "Carla Ruiz", "maintenance", { specialties: ["electricity", "appliances"], zone: "Recoleta, Palermo", phone: "+54 9 11 5555-0303" });
   const avail = (id, cells) => cells.map(([weekday, slot]) => ({ profile_id: id, organization_id: ORG, weekday, slot }));
-  must(await db.from("professional_availability").insert([
+  must(await db.from("professional_availability").upsert([
     ...avail(ricardo, [[1, "morning"], [2, "morning"], [2, "afternoon"], [3, "afternoon"], [4, "morning"], [4, "afternoon"], [5, "afternoon"]]),
     ...avail(luis, [[1, "afternoon"], [2, "afternoon"], [3, "morning"], [3, "afternoon"], [4, "afternoon"], [5, "morning"], [6, "morning"]]),
     ...avail(carla, [[1, "morning"], [3, "morning"], [5, "morning"], [5, "afternoon"]]),
-  ]));
+  ], { onConflict: "profile_id,weekday,slot", ignoreDuplicates: true }));
 
   // Dos propiedades más, con reservas
   const maria = must(await db.from("profiles").select("id").eq("organization_id", ORG).eq("role", "cleaner").limit(1))[0]?.id ?? null;
@@ -84,6 +84,7 @@ async function main() {
           amenities: ["Smart TV", "Escritorio", "Aire acondicionado"], wifi_ssid: "Duplex9", wifi_password: "colegiales99",
           house_rules: "No se permiten fiestas.", access_code: "9921", access_instructions: "Portería hasta las 20 h, después teclado.",
           manager_contact: "+54 9 11 5555-0101", default_cleaner_id: maria, status: "ready",
+          recommendations: [{ category: "Supermercado", name: "Coto Colegiales", description: "A 4 cuadras, abre hasta las 22 h." }],
         },
       ])
       .select("id"),
@@ -124,7 +125,7 @@ async function main() {
   must(await db.from("quote_requests").insert([ricardo, luis].map((p) => ({ organization_id: ORG, incident_id: canilla.id, professional_id: p }))));
   const [canillaLuis] = must(await db.from("quotes").insert([
     { organization_id: ORG, incident_id: canilla.id, professional_id: luis, repair_amount: 25000, replace_amount: 70000, notes: "Cambio de cuerito y ajuste.", proposed_slots: [at(1, "17:00"), at(2, "17:00")], status: "selected" },
-    { organization_id: ORG, incident_id: canilla.id, professional_id: ricardo, repair_amount: 32000, replace_amount: null, proposed_slots: [at(1, "10:00")], status: "discarded" },
+    { organization_id: ORG, incident_id: canilla.id, professional_id: ricardo, repair_amount: 32000, replace_amount: null, notes: "", proposed_slots: [at(1, "10:00")], status: "discarded" },
   ]).select("id"));
   must(await db.from("incidents").update({ selected_quote_id: canillaLuis.id }).eq("id", canilla.id));
 
